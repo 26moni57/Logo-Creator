@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Logo Creator</title>
+<style>
+  :root{--primary:#0d47a1;--muted:#6b7280;}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans Bengali',Arial; background:#f6f8fb;margin:0;padding:18px;color:#111;}
+  h1{text-align:center;color:var(--primary);margin-bottom:12px;}
+  .wrap{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start;}
+  .card{background:#fff;padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(13,71,161,0.06);}
+  label{display:block;margin-top:10px;font-size:.95rem;color:#222;}
+  input[type="text"], input[type="number"], select, input[type="color"], textarea {
+    width:100%;padding:8px;border-radius:6px;border:1px solid #d1d5db;margin-top:6px;box-sizing:border-box;background:white;
+  }
+  textarea{resize:vertical}
+  .row{display:flex;gap:8px;margin-top:10px;}
+  button{background:var(--primary);color:#fff;border:none;padding:9px 12px;border-radius:8px;cursor:pointer;}
+  button.secondary{background:#4b5563;}
+  .preview-wrap{display:flex;justify-content:center;align-items:center;height:100%;}
+  canvas{background:transparent;border-radius:14px;box-shadow:0 6px 18px rgba(2,6,23,0.06);max-width:100%;}
+  .muted{color:var(--muted);font-size:.9rem;}
+  .templates{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .template-btn{padding:8px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;}
+  .controls-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .download-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .note{font-size:.85rem;color:#374151;margin-top:8px;}
+  @media(max-width:980px){.wrap{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<h1>Logo Creator</h1>
+<div class="wrap">
+
+  <!-- Controls -->
+  <div class="card">
+
+    <label>Template (Quick start)</label>
+    <div class="templates" id="templates">
+      <!-- JS will insert template buttons -->
+    </div>
+
+    <label>Logo Text</label>
+    <input type="text" id="logoText" placeholder="Company Name" value="MyBrand" />
+
+    <label>Tagline (Optional)</label>
+    <input type="text" id="tagText" placeholder="Tagline (optional)" value="Creative Solutions" />
+
+    <label>Icon (emoji or single char)</label>
+    <input type="text" id="logoIcon" maxlength="3" placeholder="e.g. ✨ or A or 😀" value="✦" />
+
+    <div class="controls-grid">
+      <div>
+        <label>Primary Color</label>
+        <input type="color" id="primaryColor" value="#0d47a1" />
+      </div>
+      <div>
+        <label>Secondary Color</label>
+        <input type="color" id="secondaryColor" value="#60a5fa" />
+      </div>
+    </div>
+
+    <div class="controls-grid">
+      <div>
+        <label>Layout</label>
+        <select id="layout">
+          <option value="icon-left">Icon Left</option>
+          <option value="icon-top">Icon Top</option>
+          <option value="icon-only">Icon Only</option>
+          <option value="text-only">Text Only</option>
+        </select>
+      </div>
+      <div>
+        <label>Icon Size (%)</label>
+        <input type="number" id="iconSize" min="20" max="200" value="80" />
+      </div>
+    </div>
+
+    <div class="controls-grid">
+      <div>
+        <label>Font Family</label>
+        <select id="fontFamily">
+          <option value="system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Bengali', Arial">System</option>
+          <option value="'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto">Poppins</option>
+          <option value="'Inter', system-ui, -apple-system, 'Segoe UI', Roboto">Inter</option>
+          <option value="'Merriweather', serif">Merriweather (Serif)</option>
+        </select>
+      </div>
+      <div>
+        <label>Font Weight</label>
+        <select id="fontWeight">
+          <option value="700">700</option>
+          <option value="600">600</option>
+          <option value="500">500</option>
+          <option value="400">400</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Text Color</label>
+    <input type="color" id="textColor" value="#0d47a1" />
+
+    <div class="controls-grid">
+      <div><label>Stroke (outline px)</label><input type="number" id="strokeW" min="0" max="20" value="0" /></div>
+      <div><label>Stroke Color</label><input type="color" id="strokeColor" value="#000000" /></div>
+    </div>
+
+    <label>Shadow</label>
+    <div class="controls-grid">
+      <div><label>Enable</label>
+        <select id="shadowOn"><option value="true">Yes</option><option value="false" selected>No</option></select>
+      </div>
+      <div><label>Shadow Color</label><input type="color" id="shadowColor" value="#000000" /></div>
+    </div>
+
+    <div class="controls-grid">
+      <div><label>Shadow Offset X</label><input type="number" id="shadowX" value="0" /></div>
+      <div><label>Shadow Offset Y</label><input type="number" id="shadowY" value="6" /></div>
+    </div>
+    <div class="controls-grid">
+      <div><label>Blur</label><input type="number" id="shadowBlur" value="16" /></div>
+      <div><label>Opacity (0-1)</label><input type="number" step="0.01" min="0" max="1" id="shadowOp" value="0.12" /></div>
+    </div>
+
+    <div class="download-row">
+      <button id="renderBtn">Render</button>
+      <button id="downloadPNG">Download PNG</button>
+      <button id="downloadSVG" class="secondary">Download SVG</button>
+    </div>
+
+    <p class="note">Tip: প্রথমে Template বেছে নাও, তারপর কাস্টোমাইজ করে Render করো — তারপর PNG / SVG ডাউনলোড করো।</p>
+  </div>
+
+  <!-- Preview -->
+  <div class="card preview-card">
+    <div class="preview-wrap">
+      <canvas id="logoCanvas" width="800" height="400" style="max-width:100%;"></canvas>
+    </div>
+    <p class="muted" style="text-align:center;margin-top:8px;">Preview — রেন্ডার করে নাও ও Export করো</p>
+  </div>
+</div>
+
+<script>
+/* ====== Logo Creator JS ====== */
+
+// Template presets
+const templates = [
+  {
+    id: 'modern',
+    name: 'Modern',
+    icon: '✦',
+    primary: '#0d47a1',
+    secondary: '#60a5fa',
+    layout: 'icon-left',
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans Bengali', Arial",
+    weight: '700'
+  },
+  {
+    id: 'badge',
+    name: 'Badge',
+    icon: '★',
+    primary: '#10b981',
+    secondary: '#34d399',
+    layout: 'icon-top',
+    fontFamily: "'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto",
+    weight: '700'
+  },
+  {
+    id: 'classic',
+    name: 'Classic',
+    icon: 'A',
+    primary: '#111827',
+    secondary: '#9ca3af',
+    layout: 'icon-left',
+    fontFamily: "'Merriweather', serif",
+    weight: '600'
+  },
+  {
+    id: 'playful',
+    name: 'Playful',
+    icon: '😀',
+    primary: '#f59e0b',
+    secondary: '#fb923c',
+    layout: 'icon-top',
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto",
+    weight: '700'
+  },
+];
+
+// DOM refs
+const templatesDiv = document.getElementById('templates');
+const logoText = document.getElementById('logoText');
+const tagText = document.getElementById('tagText');
+const logoIcon = document.getElementById('logoIcon');
+const primaryColor = document.getElementById('primaryColor');
+const secondaryColor = document.getElementById('secondaryColor');
+const layoutSel = document.getElementById('layout');
+const iconSizeInp = document.getElementById('iconSize');
+const fontFamilySel = document.getElementById('fontFamily');
+const fontWeightSel = document.getElementById('fontWeight');
+const textColorInp = document.getElementById('textColor');
+const strokeW = document.getElementById('strokeW');
+const strokeColor = document.getElementById('strokeColor');
+const shadowOn = document.getElementById('shadowOn');
+const shadowColor = document.getElementById('shadowColor');
+const shadowX = document.getElementById('shadowX');
+const shadowY = document.getElementById('shadowY');
+const shadowBlur = document.getElementById('shadowBlur');
+const shadowOp = document.getElementById('shadowOp');
+
+const renderBtn = document.getElementById('renderBtn');
+const downloadPNG = document.getElementById('downloadPNG');
+const downloadSVG = document.getElementById('downloadSVG');
+
+const canvas = document.getElementById('logoCanvas');
+const ctx = canvas.getContext('2d');
+
+// insert templates
+templates.forEach(t => {
+  const btn = document.createElement('button');
+  btn.className = 'template-btn';
+  btn.innerHTML = `<div style="font-size:18px">${t.icon}</div><div style="font-size:12px;margin-top:6px">${t.name}</div>`;
+  btn.title = t.name;
+  btn.onclick = () => {
+    applyTemplate(t);
+  };
+  templatesDiv.appendChild(btn);
+});
+
+// apply template
+function applyTemplate(t) {
+  logoIcon.value = t.icon;
+  primaryColor.value = t.primary;
+  secondaryColor.value = t.secondary;
+  layoutSel.value = t.layout;
+  fontFamilySel.value = t.fontFamily;
+  fontWeightSel.value = t.weight;
+  textColorInp.value = t.primary;
+  renderLogo();
+}
+
+// render logic
+function renderLogo() {
+  // canvas base size: make responsive but fixed ratio
+  const w = 1200; // internal working width
+  const h = 600;
+  canvas.width = w;
+  canvas.height = h;
+
+  // clear
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,w,h);
+
+  // compute layout
+  const layout = layoutSel.value;
+  const iconPct = Math.max(20, Math.min(200, parseInt(iconSizeInp.value) || 80)) / 100;
+
+  // set colors
+  const primary = primaryColor.value;
+  const secondary = secondaryColor.value;
+
+  // background subtle gradient
+  const g = ctx.createLinearGradient(0,0,w,0);
+  g.addColorStop(0, hexToRgba(primary, 0.06));
+  g.addColorStop(1, hexToRgba(secondary, 0.02));
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,w,h);
+
+  // draw icon area & text area depending on layout
+  // define areas
+  let iconBox = {x: 0, y: 0, w: 0, h: 0};
+  let textBox = {x: 0, y: 0, w: 0, h: 0};
+
+  if(layout === 'icon-left'){
+    iconBox = {x: 60, y: 60, w: Math.round(w*0.3), h: h - 120};
+    textBox = {x: iconBox.x + iconBox.w + 40, y: 60, w: w - (iconBox.x + iconBox.w + 100), h: h - 120};
+  } else if(layout === 'icon-top'){
+    iconBox = {x: Math.round(w*0.5 - (w*0.3)/2), y: 40, w: Math.round(w*0.3), h: Math.round(h*0.4)};
+    textBox = {x: 60, y: iconBox.y + iconBox.h + 10, w: w - 120, h: h - (iconBox.y + iconBox.h + 80)};
+  } else if(layout === 'icon-only'){
+    iconBox = {x: Math.round(w*0.5 - (w*0.5)/2), y: Math.round(h*0.5 - (w*0.5)/2), w: Math.round(w*0.5), h: Math.round(w*0.5)};
+    textBox = {x: 0, y: 0, w: 0, h: 0};
+  } else if(layout === 'text-only'){
+    iconBox = {x:0,y:0,w:0,h:0};
+    textBox = {x:60,y:60,w:w-120,h:h-120};
+  }
+
+  // draw icon shape (rounded square with gradient fill)
+  if(iconBox.w > 0 && iconBox.h > 0){
+    const pad = Math.round(Math.min(iconBox.w, iconBox.h) * (1 - iconPct));
+    const ib = { x: iconBox.x + pad/2, y: iconBox.y + pad/2, w: iconBox.w - pad, h: iconBox.h - pad };
+    // gradient
+    const grad = ctx.createLinearGradient(ib.x, ib.y, ib.x + ib.w, ib.y + ib.h);
+    grad.addColorStop(0, primary);
+    grad.addColorStop(1, secondary);
+    // shape
+    const r = Math.round(Math.min(ib.w, ib.h) * 0.12);
+    ctx.save();
+    roundRect(ctx, ib.x, ib.y, ib.w, ib.h, r, true, false);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    // icon/text inside (emoji/letter)
+    const icon = (logoIcon.value || '').trim();
+    if(icon){
+      // shadow if enabled
+      if(shadowOn.value === 'true'){
+        ctx.shadowColor = hexToRgba(shadowColor.value, parseFloat(shadowOp.value)||0.12);
+        ctx.shadowOffsetX = parseFloat(shadowX.value) || 0;
+        ctx.shadowOffsetY = parseFloat(shadowY.value) || 6;
+        ctx.shadowBlur = parseFloat(shadowBlur.value) || 16;
+      } else {
+        ctx.shadowColor = 'rgba(0,0,0,0)';
+        ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; ctx.shadowBlur = 0;
+      }
+
+      // font size heuristic
+      const base = Math.min(ib.w, ib.h);
+      let fontSize = Math.round(base * 0.55);
+      fontSize = Math.max(24, fontSize);
+
+      ctx.font = `${parseInt(fontWeightSel.value)} ${fontSize}px ${fontFamilySel.value}`;
+      ctx.fillStyle = textColorInp.value || '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // stroke outline for icon if requested
+      const sW = parseFloat(strokeW.value) || 0;
+      if(sW > 0){
+        ctx.lineWidth = Math.max(1, Math.round(sW/2));
+        ctx.strokeStyle = strokeColor.value || '#000';
+        ctx.strokeText(icon, ib.x + ib.w/2, ib.y + ib.h/2 + Math.round(base*0.02));
+      }
+      ctx.fillText(icon, ib.x + ib.w/2, ib.y + ib.h/2 + Math.round(base*0.02));
+
+      // reset shadow
+      ctx.shadowColor = 'rgba(0,0,0,0)';
+    }
+
+    // optional icon stroke border (outer)
+    const sWidth = parseFloat(strokeW.value) || 0;
+    if(sWidth > 0){
+      ctx.lineWidth = sWidth;
+      ctx.strokeStyle = strokeColor.value;
+      roundRect(ctx, ib.x + sWidth/2, ib.y + sWidth/2, ib.w - sWidth, ib.h - sWidth, r, false, true);
+    }
+  }
+
+  // draw texts
+  if(textBox.w > 0){
+    const heading = (logoText.value || '').trim();
+    const sub = (tagText.value || '').trim();
+
+    // compute sizes
+    const headingSize = Math.round(Math.min(textBox.h * 0.45, textBox.w * 0.14));
+    const subSize = Math.round(Math.min(textBox.h * 0.2, textBox.w * 0.06));
+
+    // heading
+    if(heading){
+      ctx.font = `${parseInt(fontWeightSel.value)} ${headingSize}px ${fontFamilySel.value}`;
+      ctx.fillStyle = textColorInp.value || primary;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+
+      // position: vertically center in textBox top 60%
+      const hx = textBox.x + 10;
+      const hy = textBox.y + textBox.h * 0.38;
+      // wrap if too long (simple)
+      drawWrappedText(ctx, heading, hx, hy, textBox.w - 20, headingSize + 8);
+    }
+
+    // tagline
+    if(sub){
+      ctx.font = `${Math.max(300, parseInt(fontWeightSel.value))} ${subSize}px ${fontFamilySel.value}`;
+      ctx.fillStyle = hexToRgba(primary, 0.8);
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+
+      const sx = textBox.x + 10;
+      const sy = textBox.y + textBox.h * 0.72;
+      drawWrappedText(ctx, sub, sx, sy, textBox.w - 20, subSize + 6);
+    }
+  }
+
+  // if layout 'text-only' center text
+  if(layout === 'text-only'){
+    const heading = (logoText.value || '').trim();
+    const sub = (tagText.value || '').trim();
+    const centerX = w/2;
+    const centerY = h/2;
+
+    if(heading){
+      const headingSize = Math.round(h * 0.23);
+      ctx.font = `${parseInt(fontWeightSel.value)} ${headingSize}px ${fontFamilySel.value}`;
+      ctx.fillStyle = textColorInp.value || primary;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(heading, centerX, centerY - (sub? headingSize*0.18 : 0));
+    }
+    if(sub){
+      const subSize = Math.round(h * 0.08);
+      ctx.font = `${Math.max(400, parseInt(fontWeightSel.value))} ${subSize}px ${fontFamilySel.value}`;
+      ctx.fillStyle = hexToRgba(primary, 0.75);
+      ctx.fillText(sub, centerX, centerY + (heading? subSize*1.2 : 0));
+    }
+  }
+}
+
+// helpers
+function roundRect(ctx,x,y,w,h,r,fill,stroke){
+  if(typeof r === 'number') r = {tl:r,tr:r,br:r,bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.quadraticCurveTo(x, y, x + r.tl, y);
+  ctx.closePath();
+  if(fill) ctx.fill();
+  if(stroke) ctx.stroke();
+}
+function hexToRgba(hex, a=1){
+  const h = hex.replace('#','');
+  const full = h.length===3 ? h.split('').map(c=>c+c).join('') : h;
+  const num = parseInt(full,16);
+  const r = (num>>16)&255, g=(num>>8)&255, b=num&255;
+  return `rgba(${r},${g},${b},${a})`;
+}
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = text.split(' ');
+  let line = '', testLine='', curY = y;
+  for(let n=0;n<words.length;n++){
+    testLine = line + words[n] + ' ';
+    const metrics = ctx.measureText(testLine);
+    if(metrics.width > maxWidth && n>0){
+      ctx.fillText(line.trim(), x, curY);
+      line = words[n] + ' ';
+      curY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  if(line) ctx.fillText(line.trim(), x, curY);
+}
+
+// SVG export
+function generateSVG(){
+  const w = canvas.width, h = canvas.height;
+  // We'll serialize the same layout as canvas: create SVG with rect background gradient & text and icon as text
+  const layout = layoutSel.value;
+  const iconPct = Math.max(20, Math.min(200, parseInt(iconSizeInp.value) || 80)) / 100;
+  const primary = primaryColor.value;
+  const secondary = secondaryColor.value;
+
+  // compute areas similar to renderLogo (simplified)
+  // We'll embed fonts as family names; emoji rendering in SVG depends on platform
+  let iconBox = {x: 0, y: 0, w: 0, h: 0};
+  let textBox = {x: 0, y: 0, w: 0, h: 0};
+
+  if(layout === 'icon-left'){
+    iconBox = {x: 60, y: 60, w: Math.round(w*0.3), h: h - 120};
+    textBox = {x: iconBox.x + iconBox.w + 40, y: 60, w: w - (iconBox.x + iconBox.w + 100), h: h - 120};
+  } else if(layout === 'icon-top'){
+    iconBox = {x: Math.round(w*0.5 - (w*0.3)/2), y: 40, w: Math.round(w*0.3), h: Math.round(h*0.4)};
+    textBox = {x: 60, y: iconBox.y + iconBox.h + 10, w: w - 120, h: h - (iconBox.y + iconBox.h + 80)};
+  } else if(layout === 'icon-only'){
+    iconBox = {x: Math.round(w*0.5 - (w*0.5)/2), y: Math.round(h*0.5 - (w*0.5)/2), w: Math.round(w*0.5), h: Math.round(w*0.5)};
+  } else {
+    textBox = {x:60,y:60,w:w-120,h:h-120};
+  }
+
+  // gradient defs
+  let defs = `<defs>
+    <linearGradient id="bggrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${primary}" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="${secondary}" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>`;
+
+  let bgRect = `<rect width="${w}" height="${h}" fill="url(#bggrad)"/>`;
+
+  // icon element (as text)
+  let iconElem = '';
+  if(iconBox.w > 0 && (logoIcon.value || '').trim()){
+    const ib = iconBox;
+    const pad = Math.round(Math.min(ib.w, ib.h) * (1 - iconPct));
+    const ibx = ib.x + pad/2, iby = ib.y + pad/2, ibw = ib.w - pad, ibh = ib.h - pad;
+    const r = Math.round(Math.min(ibw, ibh) * 0.12);
+    // shape rect with gradient fill
+    const gradId = 'g2';
+    const grad = `<linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${primary}"/><stop offset="100%" stop-color="${secondary}"/></linearGradient>`;
+    defs += grad;
+    const shape = `<rect x="${ibx}" y="${iby}" width="${ibw}" height="${ibh}" rx="${r}" fill="url(#${gradId})" />`;
+
+    // icon text
+    const icon = escapeXml((logoIcon.value||'').trim());
+    const fontSize = Math.round(Math.min(ibw, ibh) * 0.55);
+    const tx = ibx + ibw/2, ty = iby + ibh/2 + Math.round(ibh*0.02);
+    const shadowFilterId = 's1';
+    let filterDef = '';
+    let filterAttr = '';
+    if(shadowOn.value === 'true'){
+      const sx = parseFloat(shadowX.value)||0;
+      const sy = parseFloat(shadowY.value)||6;
+      const blur = parseFloat(shadowBlur.value)||16;
+      const op = parseFloat(shadowOp.value)||0.12;
+      filterDef = `<filter id="${shadowFilterId}" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="${sx}" dy="${sy}" stdDeviation="${blur}" flood-color="${shadowColor.value}" flood-opacity="${op}" /></filter>`;
+      defs += filterDef;
+      filterAttr = `filter="url(#${shadowFilterId})"`;
+    }
+    iconElem = `<g ${filterAttr}>${shape}<text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="middle" font-family="${fontFamilySel.value}" font-weight="${fontWeightSel.value}" font-size="${fontSize}" fill="${textColorInp.value}">${icon}</text></g>`;
+  }
+
+  // text element
+  let textElem = '';
+  if(textBox.w > 0){
+    const heading = escapeXml((logoText.value||'').trim());
+    const sub = escapeXml((tagText.value||'').trim());
+    // place heading left-aligned in textBox
+    const hx = textBox.x + 10;
+    const hy = textBox.y + Math.round(textBox.h*0.35);
+    const sx = textBox.x + 10;
+    const sy = textBox.y + Math.round(textBox.h*0.7);
+    textElem += `<text x="${hx}" y="${hy}" font-family="${fontFamilySel.value}" font-weight="${fontWeightSel.value}" font-size="${Math.round(textBox.w * 0.08)}" fill="${textColorInp.value}">${heading}</text>`;
+    if(sub) textElem += `<text x="${sx}" y="${sy}" font-family="${fontFamilySel.value}" font-weight="${Math.max(300,parseInt(fontWeightSel.value))}" font-size="${Math.round(textBox.w * 0.04)}" fill="${hexToRgba(primaryColor.value||'#000',0.8)}">${sub}</text>`;
+  }
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+  <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  ${defs}
+  ${bgRect}
+  ${iconElem}
+  ${textElem}
+  </svg>`;
+
+  return svg;
+}
+
+// escape xml
+function escapeXml(s){
+  return s.replace(/[<>&'"]/g, function(c){ return {'<':'&lt;','>':'&gt;','&':'&amp;',"'":'&apos;','"':'&quot;'}[c]; });
+}
+
+// downloads
+renderBtn.addEventListener('click', renderLogo);
+downloadPNG.addEventListener('click', ()=> {
+  renderLogo();
+  canvas.toBlob(blob => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `logo_${canvas.width}x${canvas.height}.png`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, 'image/png');
+});
+downloadSVG.addEventListener('click', ()=> {
+  const svg = generateSVG();
+  const blob = new Blob([svg], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `logo_${canvas.width}x${canvas.height}.svg`;
+  link.click();
+  URL.revokeObjectURL(url);
+});
+
+// live preview when controls change
+const controls = [logoText, tagText, logoIcon, primaryColor, secondaryColor, layoutSel, iconSizeInp, fontFamilySel, fontWeightSel, textColorInp, strokeW, strokeColor, shadowOn, shadowColor, shadowX, shadowY, shadowBlur, shadowOp];
+controls.forEach(c => c.addEventListener('input', ()=>{ renderLogo(); }));
+
+// initial render
+renderLogo();
+
+</script>
+</body>
+</html>
